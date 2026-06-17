@@ -1,0 +1,62 @@
+# =======================================
+# 小区停车场管理系统 - 配置文件
+# =======================================
+
+# 服务器配置
+server:
+  port: 8080                    # 服务端口号
+
+# SpringBoot应用配置
+spring:
+  application:
+    name: parking-management   # 应用名称
+
+  # 数据库连接配置
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/parking_db?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
+    username: root             # 数据库用户名（根据实际情况修改）
+    password: 123456              # 数据库密码（根据实际情况修改）
+
+    # Druid连接池配置
+    type: com.alibaba.druid.pool.DruidDataSource
+    druid:
+      initial-size: 5                                  # 初始连接数
+      min-idle: 5                                       # 最小空闲连接数
+      max-active: 20                                    # 最大活跃连接数
+      max-wait: 60000                                   # 获取连接超时时间（毫秒）
+      time-between-eviction-runs-millis: 60000         # 连接回收检测间隔
+      min-evictable-idle-time-millis: 300000           # 空闲连接最小存活时间
+      validation-query: SELECT 1                        # 连接有效性检测SQL
+      test-while-idle: true                             # 空闲时检测连接有效性
+      test-on-borrow: false                             # 借出时不检测
+      test-on-return: false                             # 归还时不检测
+      pool-prepared-statements: true                   # 启用PreparedStatement缓存
+      max-pool-prepared-statement-per-connection-size: 20
+
+# MyBatis-Plus配置
+mybatis-plus:
+  # Mapper XML文件路径（classpath对应resources目录）
+  mapper-locations: classpath:mapper/**/*.xml
+  # 实体类包扫描（自动驼峰命名转换）
+  type-aliases-package: com.parking.entity
+  # MyBatis全局配置文件路径
+  config-location: classpath:mybatis-config.xml
+
+  # 全局策略配置
+  global-config:
+    db-config:
+      # 主键生成策略：自增
+      id-type: AUTO
+      # 下划线转驼峰（数据库字段如user_name自动映射到UserName）
+      column-underline: true
+
+# 日志配置
+logging:
+  level:
+    # 设置日志级别
+    root: INFO
+    com.parking: DEBUG        # 项目包日志级别设为DEBUG，便于调试
+  pattern:
+    # 日志输出格式
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"

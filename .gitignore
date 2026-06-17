@@ -1,0 +1,30 @@
+# IDE
+.idea/
+*.iml
+
+# Trae
+.trae/
+
+# Node
+node_modules/
+dist/
+.vite/
+
+# Java / Maven
+target/
+*.class
+*.jar
+*.war
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Env
+.env
+.env.local
+.env.*.local
+
+# Logs
+*.log
+logs/

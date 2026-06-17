@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.parking.mapper.ParkRecordMapper">
+
+
+    <sql id="Base_Column_List">
+        pr.id, pr.record_no, pr.user_id, pr.area_id, pr.space_id, pr.car_number,
+        pr.start_time, pr.end_time,
+        pr.parking_duration, pr.unit_price, pr.total_cost,
+        pr.status, pr.pay_status, pr.remark, pr.is_deleted, pr.create_time, pr.update_time
+    </sql>
+
+    <sql id="Relation_Column_List">
+        u.username, s.area_name AS areaName, p.space_code AS spaceCode, p.space_name AS spaceName, p.area_size AS areaSize
+    </sql>
+
+    <select id="selectRecordDetail" parameterType="java.lang.Long" resultType="com.parking.entity.ParkRecord">
+        SELECT
+            <include refid="Base_Column_List"/>,
+            <include refid="Relation_Column_List"/>
+        FROM park_record pr
+        LEFT JOIN sys_user u ON pr.user_id = u.id
+        LEFT JOIN park_area s ON pr.area_id = s.id
+        LEFT JOIN park_space p ON pr.space_id = p.id
+        WHERE pr.id = #{recordId}
+    </select>
+
+    <select id="selectRecordListWithRelations" resultType="com.parking.entity.ParkRecord">
+        SELECT
+            <include refid="Base_Column_List"/>,
+            <include refid="Relation_Column_List"/>
+        FROM park_record pr
+        LEFT JOIN sys_user u ON pr.user_id = u.id
+        LEFT JOIN park_area s ON pr.area_id = s.id
+        LEFT JOIN park_space p ON pr.space_id = p.id
+        WHERE 1=1
+        <if test="userId != null">AND pr.user_id = #{userId}</if>
+        <if test="spaceId != null">AND pr.space_id = #{spaceId}</if>
+        <if test="status != null or status == 0">AND pr.status = #{status}</if>
+        <if test="startTime != null">AND pr.create_time &gt;= #{startTime}</if>
+        <if test="endTime != null">AND pr.create_time &lt;= #{endTime}</if>
+        ORDER BY pr.create_time DESC
+    </select>
+
+    <select id="selectRecordListWithRelationsPage" resultType="com.parking.entity.ParkRecord">
+        SELECT
+            <include refid="Base_Column_List"/>,
+            <include refid="Relation_Column_List"/>
+        FROM park_record pr
+        LEFT JOIN sys_user u ON pr.user_id = u.id
+        LEFT JOIN park_area s ON pr.area_id = s.id
+        LEFT JOIN park_space p ON pr.space_id = p.id
+        WHERE 1=1
+        <if test="userId != null">AND pr.user_id = #{userId}</if>
+        <if test="spaceId != null">AND pr.space_id = #{spaceId}</if>
+        <if test="status != null or status == 0">AND pr.status = #{status}</if>
+        <if test="startTime != null">AND pr.create_time &gt;= #{startTime}</if>
+        <if test="endTime != null">AND pr.create_time &lt;= #{endTime}</if>
+        <if test="recordNo != null and recordNo != ''">AND pr.record_no LIKE CONCAT('%', #{recordNo}, '%')</if>
+        <if test="username != null and username != ''">AND u.username LIKE CONCAT('%', #{username}, '%')</if>
+        <if test="spaceCode != null and spaceCode != ''">AND p.space_code LIKE CONCAT('%', #{spaceCode}, '%')</if>
+        <if test="includeDeleted == null or includeDeleted == false">AND pr.is_deleted = 0</if>
+        ORDER BY pr.create_time DESC
+    </select>
+
+</mapper>

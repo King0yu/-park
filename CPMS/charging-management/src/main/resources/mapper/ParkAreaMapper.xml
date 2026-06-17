@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.parking.mapper.ParkAreaMapper">
+
+    <sql id="Base_Column_List">
+        id, area_code, area_name, address, province, city, district, total_spaces, status, create_time, update_time
+    </sql>
+
+    <select id="selectByAreaCode" parameterType="java.lang.String" resultType="com.parking.entity.ParkArea">
+        SELECT
+            <include refid="Base_Column_List"/>
+        FROM park_area
+        WHERE area_code = #{areaCode}
+    </select>
+
+    <select id="selectActiveAreas" resultType="com.parking.entity.ParkArea">
+        SELECT
+            <include refid="Base_Column_List"/>
+        FROM park_area
+        WHERE status = 1
+        ORDER BY create_time DESC
+    </select>
+
+    <select id="selectByAreaNameLike" parameterType="java.lang.String" resultType="com.parking.entity.ParkArea">
+        SELECT
+            <include refid="Base_Column_List"/>
+        FROM park_area
+        WHERE area_name LIKE CONCAT('%', #{areaName}, '%')
+    </select>
+
+</mapper>

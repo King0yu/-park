@@ -1,0 +1,7 @@
+// 主入口文件
+// 使用 @forward 转发变量和混合宏
+@forward './variables.scss';
+@forward './mixins.scss';
+
+// 使用 @use 包含全局样式
+@use './global.scss' as *;

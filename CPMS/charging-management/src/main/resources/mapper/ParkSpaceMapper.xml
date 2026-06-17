@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.parking.mapper.ParkSpaceMapper">
+
+    <sql id="Base_Column_List">
+        id, area_id, space_code, space_name, space_type, area_size, car_number, status, create_time, update_time
+    </sql>
+
+    <select id="selectBySpaceCode" parameterType="java.lang.String" resultType="com.parking.entity.ParkSpace">
+        SELECT
+            <include refid="Base_Column_List"/>
+        FROM park_space
+        WHERE space_code = #{spaceCode}
+    </select>
+
+    <select id="selectByAreaId" parameterType="java.lang.Long" resultType="com.parking.entity.ParkSpace">
+        SELECT
+            <include refid="Base_Column_List"/>
+        FROM park_space
+        WHERE area_id = #{areaId}
+        ORDER BY space_code
+    </select>
+
+    <select id="selectAvailableSpacesByAreaId" parameterType="java.lang.Long" resultType="com.parking.entity.ParkSpace">
+        SELECT
+            <include refid="Base_Column_List"/>
+        FROM park_space
+        WHERE area_id = #{areaId} AND status = 0
+    </select>
+
+    <select id="selectAvailableSpaces" resultType="com.parking.entity.ParkSpace">
+        SELECT
+            <include refid="Base_Column_List"/>
+        FROM park_space
+        WHERE status = 0
+        ORDER BY create_time DESC
+    </select>
+
+</mapper>

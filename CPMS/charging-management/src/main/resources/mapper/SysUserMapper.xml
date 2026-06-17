@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!--
+    SysUserMapper XML 映射文件
+    对应接口：com.parking.mapper.SysUserMapper
+    对应实体：com.parking.entity.SysUser
+    对应表：sys_user
+-->
+<mapper namespace="com.parking.mapper.SysUserMapper">
+
+    <!--
+        基础查询字段定义
+        用于复用，避免重复编写字段列表
+    -->
+    <sql id="Base_Column_List">
+        id, username, password, name, phone, email, role, status, create_time, update_time
+    </sql>
+
+    <!--
+        根据用户名查询用户
+        方法：SysUser selectByUsername(String username)
+    -->
+    <select id="selectByUsername" parameterType="java.lang.String" resultType="com.parking.entity.SysUser">
+        SELECT
+            <include refid="Base_Column_List"/>
+        FROM sys_user
+        WHERE username = #{username}
+          AND status = 1
+    </select>
+
+    <!--
+        根据手机号查询用户
+        方法：SysUser selectByPhone(String phone)
+    -->
+    <select id="selectByPhone" parameterType="java.lang.String" resultType="com.parking.entity.SysUser">
+        SELECT
+            <include refid="Base_Column_List"/>
+        FROM sys_user
+        WHERE phone = #{phone}
+          AND status = 1
+    </select>
+
+    <!--
+        根据邮箱查询用户
+        方法：SysUser selectByEmail(String email)
+    -->
+    <select id="selectByEmail" parameterType="java.lang.String" resultType="com.parking.entity.SysUser">
+        SELECT
+            <include refid="Base_Column_List"/>
+        FROM sys_user
+        WHERE email = #{email}
+          AND status = 1
+    </select>
+
+</mapper>
