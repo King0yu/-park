@@ -9,7 +9,7 @@
       <!-- 停车场主题装饰 -->
       <div class="parking-decoration parking-car">
         <svg viewBox="0 0 100 60" fill="none">
-          <rect x="5" y="20" width="90" height="35" rx="5" fill="#22c55e"/>
+          <rect x="5" y="20" width="90" height="35" rx="5" fill="#1677ff"/>
           <rect x="15" y="25" width="25" height="20" rx="3" fill="#ffffff"/>
           <rect x="60" y="25" width="25" height="20" rx="3" fill="#ffffff"/>
           <circle cx="15" cy="52" r="8" fill="#1e293b"/>
@@ -19,10 +19,10 @@
       
       <div class="parking-decoration parking-space">
         <svg viewBox="0 0 80 80" fill="none">
-          <rect x="5" y="5" width="70" height="70" rx="8" stroke="#22c55e" stroke-width="3" fill="none"/>
-          <rect x="15" y="20" width="50" height="40" rx="4" stroke="#22c55e" stroke-width="2" stroke-dasharray="4 4"/>
-          <path d="M30 30 L30 50 M50 30 L50 50" stroke="#22c55e" stroke-width="2"/>
-          <circle cx="40" cy="60" r="8" fill="#22c55e"/>
+          <rect x="5" y="5" width="70" height="70" rx="8" stroke="#1677ff" stroke-width="3" fill="none"/>
+          <rect x="15" y="20" width="50" height="40" rx="4" stroke="#1677ff" stroke-width="2" stroke-dasharray="4 4"/>
+          <path d="M30 30 L30 50 M50 30 L50 50" stroke="#1677ff" stroke-width="2"/>
+          <circle cx="40" cy="60" r="8" fill="#1677ff"/>
         </svg>
       </div>
     </div>
@@ -75,7 +75,7 @@
 
         <div class="form-options">
           <el-checkbox v-model="rememberMe">记住密码</el-checkbox>
-          <a class="forgot-link" href="#">忘记密码?</a>
+          <a class="forgot-link" href="#" @click.prevent="openForgotDialog">忘记密码?</a>
         </div>
 
         <el-form-item>
@@ -98,6 +98,148 @@
         <a href="#" @click.prevent="goToRegister">立即注册</a>
       </div>
     </div>
+
+    <!-- 忘记密码弹窗 -->
+    <el-dialog
+      v-model="forgotDialogVisible"
+      :close-on-click-modal="false"
+      :close-on-press-escape="false"
+      width="420px"
+      class="forgot-password-dialog"
+      @closed="resetForgotDialog"
+    >
+      <!-- 对话框头部 -->
+      <template #header>
+        <div class="dialog-header">
+          <div class="dialog-icon">
+            <svg viewBox="0 0 24 24" fill="none">
+              <rect x="3" y="10" width="18" height="11" rx="2" stroke="currentColor" stroke-width="2" fill="none"/>
+              <path d="M7 10V7a5 5 0 0110 0v3" stroke="currentColor" stroke-width="2" fill="none"/>
+              <circle cx="12" cy="16" r="1" fill="currentColor"/>
+            </svg>
+          </div>
+          <span class="dialog-title">重置密码</span>
+        </div>
+      </template>
+
+      <!-- 步骤条 -->
+      <el-steps :active="forgotStep" align-center class="forgot-steps" finish-status="success">
+        <el-step title="身份验证" />
+        <el-step title="设置新密码" />
+        <el-step title="完成" />
+      </el-steps>
+
+      <div class="dialog-body">
+        <!-- 步骤1：身份验证 -->
+        <el-form
+          v-if="forgotStep === 0"
+          ref="verifyFormRef"
+          :model="forgotForm"
+          :rules="forgotRules"
+          label-position="top"
+          @keyup.enter="handleVerifyIdentity"
+        >
+          <div class="step-hint">
+            <el-icon><InfoFilled /></el-icon>
+            <span>请输入您的用户名和注册时使用的手机号进行身份验证</span>
+          </div>
+          <el-form-item prop="username" label="用户名">
+            <el-input
+              v-model="forgotForm.username"
+              placeholder="请输入用户名"
+              size="large"
+              prefix-icon="User"
+              clearable
+            />
+          </el-form-item>
+          <el-form-item prop="phone" label="注册手机号">
+            <el-input
+              v-model="forgotForm.phone"
+              placeholder="请输入注册时的手机号"
+              size="large"
+              prefix-icon="Phone"
+              clearable
+              maxlength="11"
+            />
+          </el-form-item>
+          <el-button
+            type="primary"
+            size="large"
+            :loading="verifyLoading"
+            class="dialog-btn"
+            @click="handleVerifyIdentity"
+          >
+            <span v-if="!verifyLoading">验 证 身 份</span>
+            <span v-else>验 证 中...</span>
+          </el-button>
+        </el-form>
+
+        <!-- 步骤2：设置新密码 -->
+        <el-form
+          v-if="forgotStep === 1"
+          ref="resetFormRef"
+          :model="forgotForm"
+          :rules="forgotRules"
+          label-position="top"
+          @keyup.enter="handleResetPassword"
+        >
+          <div class="step-hint success">
+            <el-icon><CircleCheck /></el-icon>
+            <span>身份验证通过！请设置您的新密码</span>
+          </div>
+          <el-form-item prop="newPassword" label="新密码">
+            <el-input
+              v-model="forgotForm.newPassword"
+              type="password"
+              placeholder="请输入新密码（6-20个字符）"
+              size="large"
+              prefix-icon="Lock"
+              show-password
+            />
+          </el-form-item>
+          <el-form-item prop="confirmPassword" label="确认新密码">
+            <el-input
+              v-model="forgotForm.confirmPassword"
+              type="password"
+              placeholder="请再次输入新密码"
+              size="large"
+              prefix-icon="Lock"
+              show-password
+            />
+          </el-form-item>
+          <el-button
+            type="primary"
+            size="large"
+            :loading="resetLoading"
+            class="dialog-btn"
+            @click="handleResetPassword"
+          >
+            <span v-if="!resetLoading">重 置 密 码</span>
+            <span v-else>重 置 中...</span>
+          </el-button>
+        </el-form>
+
+        <!-- 步骤3：完成 -->
+        <div v-if="forgotStep === 2" class="complete-section">
+          <div class="complete-icon">
+            <svg viewBox="0 0 80 80" fill="none">
+              <circle cx="40" cy="40" r="36" stroke="#10b981" stroke-width="3" fill="#ecfdf5"/>
+              <path d="M25 40L35 50L55 30" stroke="#10b981" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+          <h3 class="complete-title">密码重置成功！</h3>
+          <p class="complete-desc">您的新密码已设置完成，请使用新密码登录系统</p>
+          <el-button
+            type="primary"
+            size="large"
+            class="dialog-btn"
+            @click="backToLogin"
+          >
+            返 回 登 录
+          </el-button>
+        </div>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
@@ -105,7 +247,7 @@
 import { ref, reactive } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
-import { User, Lock } from '@element-plus/icons-vue'
+import { User, Lock, Phone, InfoFilled, CircleCheck } from '@element-plus/icons-vue'
 import axios from 'axios'
 
 const router = useRouter()
@@ -113,6 +255,154 @@ const router = useRouter()
 const loginFormRef = ref(null)
 const loading = ref(false)
 const rememberMe = ref(false)
+
+// ========== 忘记密码相关 ==========
+const forgotDialogVisible = ref(false)
+const forgotStep = ref(0)
+const verifyLoading = ref(false)
+const resetLoading = ref(false)
+const verifyFormRef = ref(null)
+const resetFormRef = ref(null)
+
+const forgotForm = reactive({
+  username: '',
+  phone: '',
+  newPassword: '',
+  confirmPassword: ''
+})
+
+const validateForgotPhone = (rule, value, callback) => {
+  const reg = /^1[3-9]\d{9}$/
+  if (!value) {
+    callback(new Error('请输入注册手机号'))
+  } else if (!reg.test(value)) {
+    callback(new Error('请输入正确的手机号码'))
+  } else {
+    callback()
+  }
+}
+
+const validateNewPassword = (rule, value, callback) => {
+  if (!value) {
+    callback(new Error('请输入新密码'))
+  } else if (value.length < 6 || value.length > 20) {
+    callback(new Error('密码长度需为6-20个字符'))
+  } else {
+    callback()
+  }
+}
+
+const validateForgotConfirmPassword = (rule, value, callback) => {
+  if (!value) {
+    callback(new Error('请再次输入新密码'))
+  } else if (value !== forgotForm.newPassword) {
+    callback(new Error('两次输入密码不一致'))
+  } else {
+    callback()
+  }
+}
+
+const forgotRules = {
+  username: [
+    { required: true, message: '请输入用户名', trigger: 'blur' },
+    { min: 3, max: 20, message: '用户名长度为3-20个字符', trigger: 'blur' }
+  ],
+  phone: [
+    { required: true, validator: validateForgotPhone, trigger: 'blur' }
+  ],
+  newPassword: [
+    { required: true, validator: validateNewPassword, trigger: 'blur' }
+  ],
+  confirmPassword: [
+    { required: true, validator: validateForgotConfirmPassword, trigger: 'blur' }
+  ]
+}
+
+const openForgotDialog = () => {
+  forgotDialogVisible.value = true
+}
+
+const resetForgotDialog = () => {
+  forgotStep.value = 0
+  forgotForm.username = ''
+  forgotForm.phone = ''
+  forgotForm.newPassword = ''
+  forgotForm.confirmPassword = ''
+  verifyLoading.value = false
+  resetLoading.value = false
+  if (verifyFormRef.value) verifyFormRef.value.resetFields()
+  if (resetFormRef.value) resetFormRef.value.resetFields()
+}
+
+const handleVerifyIdentity = async () => {
+  if (!verifyFormRef.value) return
+  try {
+    await verifyFormRef.value.validate()
+  } catch (e) {
+    return
+  }
+
+  verifyLoading.value = true
+  try {
+    const response = await axios.post('/api/user/forgotPassword', {
+      username: forgotForm.username,
+      phone: forgotForm.phone,
+      mode: 'verify'
+    })
+    
+    if (response.data.code === 200) {
+      forgotStep.value = 1
+    } else {
+      ElMessage.error(response.data.msg || '身份验证失败')
+    }
+  } catch (error) {
+    if (error.response) {
+      ElMessage.error(error.response.data?.msg || '身份验证失败')
+    } else {
+      ElMessage.error('网络异常，请稍后重试')
+    }
+  } finally {
+    verifyLoading.value = false
+  }
+}
+
+const handleResetPassword = async () => {
+  if (!resetFormRef.value) return
+  try {
+    await resetFormRef.value.validate()
+  } catch (e) {
+    return
+  }
+
+  resetLoading.value = true
+  try {
+    const response = await axios.post('/api/user/forgotPassword', {
+      username: forgotForm.username,
+      phone: forgotForm.phone,
+      newPassword: forgotForm.newPassword
+    })
+    
+    if (response.data.code === 200) {
+      forgotStep.value = 2
+    } else {
+      ElMessage.error(response.data.msg || '密码重置失败')
+    }
+  } catch (error) {
+    if (error.response) {
+      ElMessage.error(error.response.data?.msg || '请求失败')
+    } else {
+      ElMessage.error('网络异常，请稍后重试')
+    }
+  } finally {
+    resetLoading.value = false
+  }
+}
+
+const backToLogin = () => {
+  forgotDialogVisible.value = false
+  ElMessage.success('请使用新密码登录系统')
+}
+// ========== 忘记密码相关结束 ==========
 
 const loginForm = reactive({
   username: '',
@@ -215,7 +505,7 @@ loadRememberedCredentials()
   display: flex;
   justify-content: center;
   align-items: center;
-  background: linear-gradient(135deg, $primary-50 0%, $secondary-light 50%, $primary-100 100%);
+  background: linear-gradient(135deg, #e0edff 0%, #f0f7ff 100%);
   overflow: hidden;
 }
 
@@ -489,6 +779,209 @@ loadRememberedCredentials()
 
 .register-hint a:hover {
   text-decoration: underline;
+}
+
+// ========== 忘记密码弹窗样式 ==========
+.forgot-password-dialog :deep(.el-dialog) {
+  border-radius: $radius-xl;
+  overflow: hidden;
+  box-shadow: 
+    0 25px 50px rgba(0, 0, 0, 0.12),
+    0 0 60px rgba($primary-color, 0.1);
+}
+
+.forgot-password-dialog :deep(.el-dialog__header) {
+  margin: 0;
+  padding: 20px 24px 0;
+  border-bottom: none;
+}
+
+.forgot-password-dialog :deep(.el-dialog__body) {
+  padding: 0 24px 24px;
+}
+
+.forgot-password-dialog :deep(.el-dialog__headerbtn) {
+  top: 20px;
+  right: 20px;
+  width: 32px;
+  height: 32px;
+  border-radius: $radius-sm;
+  transition: all $transition-fast;
+}
+
+.forgot-password-dialog :deep(.el-dialog__headerbtn:hover) {
+  background: $bg-hover;
+}
+
+.dialog-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.dialog-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  background: linear-gradient(135deg, $primary-color 0%, $primary-light 100%);
+  border-radius: $radius-md;
+  box-shadow: 0 8px 20px rgba($primary-color, 0.25);
+}
+
+.dialog-icon svg {
+  width: 22px;
+  height: 22px;
+  color: white;
+}
+
+.dialog-title {
+  font-size: $font-size-xl;
+  font-weight: $font-weight-bold;
+  color: $text-primary;
+  letter-spacing: 0.5px;
+}
+
+.forgot-steps {
+  margin: 20px 0 24px;
+  padding: 0 8px;
+}
+
+.forgot-steps :deep(.el-step__title) {
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+}
+
+.forgot-steps :deep(.el-step__head.is-finish .el-step__icon) {
+  background: $success-color;
+  border-color: $success-color;
+}
+
+.forgot-steps :deep(.el-step__head.is-process .el-step__icon) {
+  background: $primary-color;
+  border-color: $primary-color;
+}
+
+.dialog-body {
+  min-height: 200px;
+}
+
+.step-hint {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  margin-bottom: 20px;
+  background: linear-gradient(135deg, rgba($primary-color, 0.06) 0%, rgba($primary-light, 0.06) 100%);
+  border-radius: $radius-sm;
+  border: 1px solid rgba($primary-color, 0.12);
+  font-size: $font-size-sm;
+  color: $text-secondary;
+  line-height: 1.5;
+
+  .el-icon {
+    color: $primary-color;
+    font-size: $font-size-lg;
+    flex-shrink: 0;
+  }
+
+  &.success {
+    background: linear-gradient(135deg, rgba($success-color, 0.06) 0%, rgba($success-light, 0.06) 100%);
+    border-color: rgba($success-color, 0.15);
+
+    .el-icon {
+      color: $success-color;
+    }
+  }
+}
+
+.forgot-password-dialog :deep(.el-form-item__label) {
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+  color: $text-primary;
+  padding-bottom: 6px;
+}
+
+.forgot-password-dialog :deep(.el-input__wrapper) {
+  border-radius: $radius-md;
+  box-shadow: 0 0 0 1px $border-color;
+  transition: all $transition-normal;
+}
+
+.forgot-password-dialog :deep(.el-input__wrapper:hover) {
+  box-shadow: 0 0 0 1px $primary-color;
+}
+
+.forgot-password-dialog :deep(.el-input__wrapper.is-focus) {
+  box-shadow: 0 0 0 2px rgba($primary-color, 0.2), 0 0 0 1px $primary-color;
+}
+
+.dialog-btn {
+  width: 100%;
+  height: 46px;
+  font-size: $font-size-lg;
+  font-weight: $font-weight-semibold;
+  border-radius: $radius-md;
+  margin-top: 4px;
+  background: linear-gradient(135deg, $primary-color 0%, $primary-light 100%);
+  border: none;
+  box-shadow: 0 6px 20px rgba($primary-color, 0.3);
+  transition: all $transition-normal;
+}
+
+.dialog-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 28px rgba($primary-color, 0.4);
+}
+
+.dialog-btn:active {
+  transform: translateY(0);
+}
+
+// 完成步骤样式
+.complete-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 16px 0 8px;
+}
+
+.complete-icon {
+  width: 80px;
+  height: 80px;
+  margin-bottom: 16px;
+  animation: completeIn 0.5s ease-out;
+}
+
+.complete-icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+@keyframes completeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.complete-title {
+  font-size: $font-size-xl;
+  font-weight: $font-weight-bold;
+  color: $text-primary;
+  margin: 0 0 8px 0;
+}
+
+.complete-desc {
+  font-size: $font-size-base;
+  color: $text-muted;
+  margin: 0 0 24px 0;
+  line-height: 1.6;
 }
 
 @media (max-width: $breakpoint-xs) {

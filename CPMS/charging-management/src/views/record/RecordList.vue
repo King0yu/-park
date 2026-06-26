@@ -706,13 +706,13 @@ onMounted(() => {
 
 .role-tag {
   padding: 6px 14px;
-  background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+  background: linear-gradient(135deg, #1677ff 0%, #0958d9 100%);
   color: white;
   border-radius: 20px;
   font-size: 12px;
   font-weight: 600;
   letter-spacing: 0.3px;
-  box-shadow: 0 4px 12px rgba(34, 197, 94, 0.25);
+  box-shadow: 0 4px 12px rgba(22, 119, 255, 0.25);
 }
 
 .role-tag.admin {
@@ -721,8 +721,8 @@ onMounted(() => {
 }
 
 .role-tag.user {
-  background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
-  box-shadow: 0 4px 12px rgba(34, 197, 94, 0.25);
+  background: linear-gradient(135deg, #1677ff 0%, #0958d9 100%);
+  box-shadow: 0 4px 12px rgba(22, 119, 255, 0.25);
 }
 
 .search-card {
@@ -750,12 +750,12 @@ onMounted(() => {
 
 .search-form :deep(.el-input__wrapper:hover),
 .search-form :deep(.el-select .el-input__wrapper:hover) {
-  box-shadow: 0 0 0 1px rgba(34, 197, 94, 0.3);
+  box-shadow: 0 0 0 1px rgba(22, 119, 255, 0.3);
 }
 
 .search-form :deep(.el-input__wrapper.is-focus),
 .search-form :deep(.el-select .el-input__wrapper.is-focus) {
-  box-shadow: 0 0 0 2px rgba(34, 197, 94, 0.15), 0 0 0 1px rgba(34, 197, 94, 0.4) !important;
+  box-shadow: 0 0 0 2px rgba(22, 119, 255, 0.15), 0 0 0 1px rgba(22, 119, 255, 0.4) !important;
 }
 
 .search-form :deep(.el-button) {
@@ -767,14 +767,14 @@ onMounted(() => {
 }
 
 .search-form :deep(.el-button--primary) {
-  background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+  background: linear-gradient(135deg, #1677ff 0%, #0958d9 100%);
   border: none;
-  box-shadow: 0 4px 12px rgba(34, 197, 94, 0.25);
+  box-shadow: 0 4px 12px rgba(22, 119, 255, 0.25);
 }
 
 .search-form :deep(.el-button--primary:hover) {
   transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(34, 197, 94, 0.35);
+  box-shadow: 0 8px 20px rgba(22, 119, 255, 0.35);
 }
 
 .search-select {
@@ -851,7 +851,7 @@ onMounted(() => {
 }
 
 .order-table :deep(.el-table__body tr:hover) {
-  background: rgba(34, 197, 94, 0.03);
+  background: rgba(22, 119, 255, 0.03);
 }
 
 .order-table :deep(.el-table__body tr.deleted-row) {
@@ -901,8 +901,8 @@ onMounted(() => {
 }
 
 .pagination-wrapper :deep(.el-pagination.is-background .el-pager li.is-active) {
-  background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
-  box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);
+  background: linear-gradient(135deg, #1677ff 0%, #0958d9 100%);
+  box-shadow: 0 4px 12px rgba(22, 119, 255, 0.3);
 }
 
 .order-detail :deep(.el-descriptions__title) {
@@ -960,12 +960,12 @@ onMounted(() => {
 
 :deep(.el-button--primary) {
   background: transparent !important;
-  color: #9333ea !important;
+  color: #1677ff !important;
   border: none;
 }
 
 :deep(.el-button--primary:hover) {
-  color: #7c3aed !important;
+  color: #0958d9 !important;
   text-decoration: underline;
 }
 
@@ -1041,7 +1041,7 @@ onMounted(() => {
 .summary-value.highlight {
   font-size: 18px;
   font-weight: 700;
-  color: #9333ea;
+  color: #1677ff;
 }
 
 .loading-text {

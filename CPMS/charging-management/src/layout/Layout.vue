@@ -63,7 +63,7 @@
           class="sidebar-menu"
           background-color="transparent"
           text-color="#94a3b8"
-          active-text-color="#22c55e"
+          active-text-color="#1677ff"
         >
           <el-menu-item index="/system/user" class="menu-item">
             <el-icon class="menu-icon"><User /></el-icon>
@@ -136,10 +136,10 @@ const handleCommand = (command) => {
       }).catch(() => {})
       break
     case 'profile':
-      ElMessage.info('功能开发中...')
+      router.push('/system/profile')
       break
     case 'settings':
-      ElMessage.info('功能开发中...')
+      router.push('/system/settings')
       break
   }
 }
@@ -154,7 +154,7 @@ const handleCommand = (command) => {
   height: 100vh;
   display: flex;
   flex-direction: column;
-  background: linear-gradient(135deg, $bg-secondary 0%, $bg-tertiary 100%);
+  background: linear-gradient(135deg, #f0f5ff 0%, #f8fafc 100%);
 }
 
 .header {

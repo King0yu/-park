@@ -5,6 +5,62 @@
       <p>选择停车区域和停车位，登记停车记录</p>
     </div>
 
+    <!-- 区域标签页 + 停车位网格 -->
+    <div class="grid-section">
+      <div class="section-title">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="3" y="3" width="7" height="7" rx="1"></rect>
+          <rect x="14" y="3" width="7" height="7" rx="1"></rect>
+          <rect x="14" y="14" width="7" height="7" rx="1"></rect>
+          <rect x="3" y="14" width="7" height="7" rx="1"></rect>
+        </svg>
+        <span>区域停车位</span>
+      </div>
+
+      <el-tabs
+        v-model="activeAreaId"
+        type="border-card"
+        class="area-tabs"
+        @tab-change="handleTabChange"
+      >
+        <el-tab-pane
+          v-for="area in areaList"
+          :key="area.id"
+          :label="area.areaCode"
+          :name="area.id"
+        />
+      </el-tabs>
+
+      <div class="grid-legend">
+        <div class="legend-item">
+          <span class="legend-dot free"></span>
+          <span>空闲</span>
+        </div>
+        <div class="legend-item">
+          <span class="legend-dot occupied"></span>
+          <span>已占用</span>
+        </div>
+        <div class="legend-item">
+          <span class="legend-dot fault"></span>
+          <span>故障/维护</span>
+        </div>
+      </div>
+
+      <div v-loading="loadingGridSpaces" class="grid-scroll-wrapper">
+        <div class="space-grid">
+          <div
+            v-for="space in gridSpaceList"
+            :key="space.id"
+            class="space-cell"
+            :class="getSpaceStatusClass(space.status)"
+            @click="handleSpaceClick(space)"
+          >
+            {{ space.spaceCode }}
+          </div>
+        </div>
+      </div>
+    </div>
+
     <div class="main-content">
       <!-- 左侧：选择表单 -->
       <div class="form-section">
@@ -42,7 +98,7 @@
             :disabled="!parkingForm.areaId || loadingSpaces"
           >
             <el-option
-              v-for="space in spaceList"
+              v-for="space in availableSpaceList"
               :key="space.id"
               :label="space.spaceName + ' (' + space.spaceCode + ')'"
               :value="space.id"
@@ -128,17 +184,17 @@
             <svg class="arrow-svg" viewBox="0 0 200 60">
               <defs>
                 <linearGradient id="arrowGradient1" x1="0%" y1="0%" x2="100%" y2="0%">
-                  <stop offset="0%" stop-color="#10b981" />
-                  <stop offset="100%" stop-color="#059669" />
+                  <stop offset="0%" stop-color="#1677ff" />
+                  <stop offset="100%" stop-color="#0958d9" />
                 </linearGradient>
               </defs>
               <path d="M10 30 L170 30" stroke="url(#arrowGradient1)" stroke-width="4" fill="none" marker-end="url(#arrowhead1)"/>
               <defs>
                 <marker id="arrowhead1" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
-                  <polygon points="0 0, 10 3.5, 0 7" fill="#059669"/>
+                  <polygon points="0 0, 10 3.5, 0 7" fill="#0958d9"/>
                 </marker>
               </defs>
-              <circle r="6" fill="#10b981">
+              <circle r="6" fill="#1677ff">
                 <animate attributeName="cx" from="10" to="170" dur="1.5s" repeatCount="indefinite"/>
               </circle>
             </svg>
@@ -147,18 +203,10 @@
           <!-- 停车区域 -->
           <div class="animation-item pile-item" :class="{ selected: parkingForm.areaId }">
             <div class="icon-wrapper" v-if="parkingForm.areaId">
-              <svg viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" class="pile-svg">
-                <path d="M511.6928 514.2016m-450.816 0a450.816 450.816 0 1 0 901.632 0 450.816 450.816 0 1 0-901.632 0Z" fill="#E9F4FF"/>
-                <path d="M789.7088 733.3376H742.4V256.8192a67.8912 67.8912 0 0 0-69.0688-66.56H349.9008a67.8912 67.8912 0 0 0-69.0688 66.56v476.5184h-47.1552a28.672 28.672 0 1 0 0 57.344h556.032a28.672 28.672 0 1 0 0-57.344z" fill="#2595E8"/>
-                <path d="M789.7088 733.3376H742.4V256.8192a67.8912 67.8912 0 0 0-69.0688-66.56H349.9008a67.8912 67.8912 0 0 0-69.0688 66.56v476.5184h-47.1552a28.672 28.672 0 1 0 0 57.344h248.2176A452.0448 452.0448 0 0 0 742.4 549.2224z" fill="#3A9CED"/>
-                <path d="M367.0528 297.3696a40.96 40.96 0 0 1 41.6768-40.192h205.9264a40.96 40.96 0 0 1 41.6768 40.192v87.9104a40.96 40.96 0 0 1-41.6768 40.192H408.7296a40.96 40.96 0 0 1-41.6768-40.192z" fill="#59ADF8"/>
-                <path d="M426.496 314.5728h170.3424V368.128H426.496z" fill="#59ADF8"/>
-                <g class="lightning-bolt">
-                  <path d="M450.56 520a29.696 29.696 0 0 1-27.1872-17.152 27.904 27.904 0 0 1 5.12-30.72L497.664 416a30.72 30.72 0 0 1 42.0352-1.6384 28.0064 28.0064 0 0 1 1.7408 40.4992l-22.9888 24.1152h54.2208a29.7472 29.7472 0 0 1 27.4432 17.664 27.904 27.904 0 0 1-6.4 31.232l-112.1792 108.8a30.72 30.72 0 0 1-42.0352 0z" fill="#FFD700"/>
-                </g>
-                <circle cx="512" cy="680" r="20" fill="#10b981">
-                  <animate attributeName="opacity" values="1;0.5;1" dur="1s" repeatCount="indefinite"/>
-                </circle>
+              <svg t="1781949669549" class="pile-svg" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="5556">
+                <path d="M535.27241 618.35664a25.134528 25.134528 0 0 1 30.254525 10.007266H605.090544v-23.272711h-69.818134zM628.363256 628.363906h37.236338a28.392708 28.392708 0 0 1 23.272711-11.636356 27.229072 27.229072 0 0 1 9.774539 2.094544V605.091195H628.363256zM543.650586 418.909503a90.996302 90.996302 0 0 0 29.556344-19.549077 95.883571 95.883571 0 0 0 20.247258-29.090889 88.203576 88.203576 0 0 0 7.447268-35.839976 84.479942 84.479942 0 0 0-7.21454-35.374521 80.989036 80.989036 0 0 0-19.549078-27.694527 91.694483 91.694483 0 0 0-29.090889-18.618169 98.210842 98.210842 0 0 0-36.538157-6.749086h-128.930821v180.130786h128.930821a86.341759 86.341759 0 0 0 35.141794-7.214541z" fill="#5C88FF" p-id="5557"></path>
+                <path d="M511.999699 116.364255a325.81796 325.81796 0 1 0 325.817959 325.81796A325.81796 325.81796 0 0 0 511.999699 116.364255z m-132.421728 558.545074h-50.734511V200.844198h179.665332a151.039897 151.039897 0 0 1 61.672685 11.869082 142.196267 142.196267 0 0 1 44.916333 31.185434 127.069004 127.069004 0 0 1 27.229072 43.51997 133.352636 133.352636 0 0 1 9.309085 48.40724 139.636268 139.636268 0 0 1-9.541812 50.269056 135.912635 135.912635 0 0 1-27.694526 43.519971 131.258092 131.258092 0 0 1-44.916333 30.487252 157.323529 157.323529 0 0 1-60.974504 11.403628h-128.930821z m343.970674-29.090889h-6.050905a29.090889 29.090889 0 0 1-58.181778 0h-87.272668a29.090889 29.090889 0 0 1-58.181779 0h-6.050905a14.196354 14.196354 0 0 1-12.799991-20.712713l14.894535-29.556344a13.963627 13.963627 0 0 1 12.567265-7.912722h27.461799a6.749086 6.749086 0 0 1-6.981813-6.981813 80.756309 80.756309 0 0 1 53.527236-22.109076h38.399974a168.959885 168.959885 0 0 1 53.527236 22.109076 6.981813 6.981813 0 0 1-6.981813 6.981813h27.229072a13.963627 13.963627 0 0 1 12.567264 7.912722l14.894535 29.556344a14.196354 14.196354 0 0 1-12.567264 20.712713z" fill="#5C88FF" p-id="5558"></path>
+                <path d="M511.999699 0.000698a442.181517 442.181517 0 0 0-116.363558 869.003044A289.745257 289.745257 0 0 1 511.999699 1024a289.745257 289.745257 0 0 1 116.363557-154.996258A442.181517 442.181517 0 0 0 511.999699 0.000698z m0 814.544899a372.363382 372.363382 0 1 1 372.363382-372.363382 372.363382 372.363382 0 0 1-372.363382 372.363382z" fill="#5C88FF" p-id="5559"></path>
               </svg>
             </div>
             <div class="icon-wrapper placeholder" v-else>
@@ -195,14 +243,18 @@
           <!-- 停车位 -->
           <div class="animation-item gun-item" :class="{ selected: parkingForm.spaceId }">
             <div class="icon-wrapper" v-if="parkingForm.spaceId">
-              <svg viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" class="gun-svg">
-                <path d="M213.333333 231.722667h72.106667a21.333333 21.333333 0 0 1 21.333333 21.333333v131.904a21.333333 21.333333 0 0 1-21.333333 21.333333H213.333333a21.333333 21.333333 0 0 1-21.333333-21.333333v-131.904a21.333333 21.333333 0 0 1 21.333333-21.333333z" fill="#1FA4FE"/>
-                <path d="M294.506667 192h248.789333a21.333333 21.333333 0 0 1 19.136 11.904l175.424 356.245333a21.333333 21.333333 0 0 1-9.770667 28.586667l-125.653333 61.568a21.333333 21.333333 0 0 1-28.245333-9.130667l-102.016-191.68a21.333333 21.333333 0 0 0-18.837334-11.306666h-158.826666a21.333333 21.333333 0 0 1-21.333334-21.333334V213.333333a21.333333 21.333333 0 0 1 21.333334-21.333333z" fill="#1FA4FE"/>
-                <path d="M703.36 232.021333a21.333333 21.333333 0 0 1 19.498667 12.650667l107.541333 241.28a21.333333 21.333333 0 0 1-19.477333 30.016h-57.92a21.333333 21.333333 0 0 1-19.626667-12.949333l-25.941333-60.8a21.333333 21.333333 0 0 0-21.248-12.906667l-63.509334 4.842667a21.333333 21.333333 0 0 1-21.226666-12.864l-68.416-159.530667a21.333333 21.333333 0 0 1 19.605333-29.738667h150.741333z" fill="#1FA4FE"/>
-                <path d="M700.757333 685.44c65.6 101.034667 53.44 159.765333-38.08 161.749333l-4.906666 0.064v-21.824c59.136 0 76.928-23.637333 52.544-78.485333l-3.776-8.042667a303.786667 303.786667 0 0 0-6.72-12.885333l-5.205334-9.109333-5.781333-9.6-6.357333-10.005334 18.282666-11.882666z" fill="#1FA4FE"/>
-                <circle cx="720" cy="700" r="15" fill="#10b981">
-                  <animate attributeName="opacity" values="1;0.3;1" dur="0.8s" repeatCount="indefinite"/>
-                </circle>
+              <svg t="1781949864317" class="gun-svg" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="10140">
+                <path d="M944.128 824.32c-1.536-13.312-2.048-26.624-2.56-39.936 0-6.144-2.048-9.728-9.216-10.24-9.216-0.512-18.432-3.072-27.136-4.608-8.704-1.536-14.336-8.704-12.8-15.872 1.536-7.68 8.704-11.776 17.408-10.24 9.216 1.536 18.944 3.584 28.16 5.12 2.048-8.704-0.512-14.848-9.728-20.992-26.112-17.408-54.784-29.696-84.992-37.888-33.792-9.216-68.608-16.384-102.4-24.576-3.584-1.024-7.68-2.56-10.752-5.12-38.4-32.256-80.384-59.904-125.44-81.92-39.424-19.456-81.92-25.6-124.928-28.672-46.592-3.072-92.672 0-138.24 6.656-21.504 3.072-41.472 11.264-59.392 22.528-28.16 17.408-56.32 35.328-83.456 54.272-14.848 10.752-29.696 14.848-47.104 10.24-8.192-2.048-16.384-2.56-24.576-4.096-10.752-1.536-17.92 2.048-19.456 10.752-1.536 9.216 3.584 15.872 14.336 17.92 2.048 0.512 4.096 1.024 6.144 1.024 0 0.512 0 1.024 0.512 1.536-8.704 3.072-16.896 6.656-25.6 9.216-18.944 6.656-21.504 9.216-22.016 29.696v9.216h35.328c9.728 0 16.384 5.12 16.384 12.8 0.512 8.192-6.656 14.336-16.384 14.336h-35.328V813.056c0 5.12-1.536 8.704-5.632 12.288s-6.144 10.24-8.192 15.872c-1.024 2.56 0 5.632 0 8.704-1.536 23.552 9.216 28.16 26.624 30.208 6.656 0.512 13.824 1.536 21.504 2.56-3.072-44.544 10.24-81.92 43.52-110.592 24.576-20.992 53.248-30.72 85.504-29.696 24.064 1.024 46.08 8.192 65.536 22.016 19.968 13.824 34.816 32.256 44.032 54.784 9.216 22.016 11.776 45.056 8.192 69.12H660.48c-5.632-48.64 9.216-89.6 47.616-120.32 26.624-20.992 57.344-28.672 91.136-25.088 60.416 6.656 121.856 66.048 107.008 151.04 12.8-2.048 25.088-4.096 37.376-6.144 2.56-0.512 5.12-3.072 7.168-5.12 9.216-9.728 7.68-39.424-2.048-48.64-2.56-1.536-4.608-5.632-4.608-9.728z" fill="#008AFF" p-id="10141"></path>
+                <path d="M277.504 675.328c28.672-41.472 63.488-70.656 113.152-79.36 2.048 29.696 4.608 59.392 6.656 89.088-39.936-3.072-79.36-6.656-119.808-9.728zM456.704 746.496c-5.632 0.512-10.752 0-16.384 0h-17.92c-7.68-1.024-13.824-7.68-13.312-14.848 0.512-6.656 6.656-12.288 14.336-12.288 10.752 0 22.016-0.512 32.768 0 8.192 0 14.336 5.632 14.336 13.312 0.512 7.68-5.12 13.312-13.824 13.824zM427.008 688.128c-2.56-32.256-4.608-63.488-6.656-94.72 102.912-11.776 189.952 23.04 268.288 89.6-88.064 19.968-174.592 9.728-261.632 5.12z" fill="#B7D3FF" p-id="10142"></path>
+                <path d="M911.36 430.592c0 2.56 0 4.608 0 0zM911.36 434.176V430.08 434.176zM911.36 430.08v-3.584V430.08zM911.36 423.424v0z" fill="#59A2EC" p-id="10143"></path>
+                <path d="M601.088 475.136c17.92-1.024 36.352-0.512 54.272-0.512h44.032c18.432 0 36.864 0.512 55.296 0.512h35.84c31.232 0 62.976 0.512 94.208 0 12.8 0 25.6-1.024 37.376-10.24 14.336-11.776 20.992-26.624 20.992-43.52 0.512-95.744 0.512-191.488 0-287.232 0-24.576-10.752-45.056-38.912-52.224-3.072-1.024-6.144-1.024-9.216-1.024h-296.96c-23.552 0-47.616 22.016-48.128 47.104-0.512 28.672 0 57.856 0 86.528 0 38.4-0.512 76.8-0.512 115.712 0 32.256-1.024 64 0 96.256 0.512 29.184 27.648 49.664 51.712 48.64z" fill="#B7D3FF" p-id="10144"></path>
+                <path d="M911.36 428.032v0zM911.36 430.08c0 0.512 0 0.512 0 0v-1.024 1.024z" fill="#59A2EC" p-id="10145"></path>
+                <path d="M239.104 776.192c-49.664 0-90.624 39.936-91.648 87.04-1.536 54.784 43.008 96.768 91.136 95.232 51.2 0 90.624-39.936 90.624-92.16 0-49.664-40.448-90.112-90.112-90.112z" fill="#008AFF" p-id="10146"></path>
+                <path d="M239.104 901.632c-17.92 0.512-34.816-15.872-34.816-34.304-0.512-17.92 15.872-34.816 34.304-34.816 17.92 0 34.304 16.384 34.304 34.304 0 18.432-15.872 34.304-33.792 34.816z" fill="#B7D3FF" p-id="10147"></path>
+                <path d="M787.456 776.192c-53.248-1.536-94.72 41.984-94.72 90.112 0.512 51.712 39.424 92.16 89.6 92.16 52.224 0 91.648-39.424 91.648-91.648 1.024-48.64-39.424-89.6-86.528-90.624z" fill="#008AFF" p-id="10148"></path>
+                <path d="M783.872 901.632c-18.432-0.512-34.304-15.872-34.304-34.816 0-18.432 16.384-34.304 34.816-33.792 17.92 0.512 33.792 16.384 33.792 34.304 0 18.432-16.384 34.816-34.304 34.304z" fill="#B7D3FF" p-id="10149"></path>
+                <path d="M705.536 330.752h10.752c18.944-0.512 38.4 0.512 56.832-2.048 72.192-11.264 95.744-77.312 71.168-131.584-15.872-34.816-47.104-48.128-83.456-49.152-34.816-1.024-70.144-0.512-104.96 0-2.56 0-5.12 0.512-7.68 0.512v260.096h57.344V330.752z" fill="#008AFF" p-id="10150"></path>
+                <path d="M706.048 197.632c19.456 1.024 38.4 0.512 56.832 3.072 20.992 3.072 32.256 19.456 31.232 40.96-0.512 18.944-13.824 33.28-33.28 36.864l-10.752 1.536h-44.544c0.512-27.648 0.512-54.272 0.512-82.432z" fill="#B7D3FF" p-id="10151"></path>
               </svg>
             </div>
             <div class="icon-wrapper placeholder" v-else>
@@ -255,6 +307,39 @@
       </div>
     </div>
 
+    <!-- 网格登记弹窗 -->
+    <el-dialog
+      v-model="registerDialogVisible"
+      title="登记停车"
+      width="420px"
+      :close-on-click-modal="false"
+    >
+      <div class="register-info">
+        <p><span class="register-label">停车区域：</span>{{ selectedGridAreaName }}</p>
+        <p><span class="register-label">停车位：</span>{{ selectedGridSpace?.spaceCode }}</p>
+      </div>
+      <div class="form-item">
+        <label>车牌号</label>
+        <el-input
+          v-model="registerCarNumber"
+          placeholder="请输入车牌号（如：京A12345）"
+          maxlength="20"
+        />
+      </div>
+      <template #footer>
+        <div class="dialog-actions">
+          <el-button @click="registerDialogVisible = false">取消</el-button>
+          <el-button
+            type="primary"
+            :loading="registerLoading"
+            @click="handleRegisterConfirm"
+          >
+            确认登记
+          </el-button>
+        </div>
+      </template>
+    </el-dialog>
+
     <el-dialog
       v-model="showSuccessDialog"
       title="停车登记成功"
@@ -268,7 +353,7 @@
           </svg>
         </div>
         <h3>停车记录已创建</h3>
-        <p class="order-no">记录编号：{{ orderInfo.orderNo }}</p>
+        <p class="order-no">记录编号：{{ orderInfo.recordNo }}</p>
         <p class="order-time">开始时间：{{ formatDateTime(orderInfo.startTime) }}</p>
       </div>
       <div class="dialog-actions">
@@ -284,6 +369,8 @@ import { ref, reactive, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import axios from 'axios'
+import parkApi from '@/api/park'
+import recordApi from '@/api/record'
 
 const router = useRouter()
 
@@ -344,6 +431,15 @@ const isParking = ref(false)
 const showSuccessDialog = ref(false)
 const orderInfo = ref({})
 
+// 网格化相关状态
+const activeAreaId = ref(null)
+const gridSpaceList = ref([])
+const loadingGridSpaces = ref(false)
+const selectedGridSpace = ref(null)
+const registerDialogVisible = ref(false)
+const registerCarNumber = ref('')
+const registerLoading = ref(false)
+
 const selectedAreaName = computed(() => {
   const area = areaList.value.find(p => p.id === parkingForm.areaId)
   return area ? area.areaName : ''
@@ -359,6 +455,19 @@ const selectedSpaceSize = computed(() => {
   return space ? space.areaSize : null
 })
 
+// 左侧表单只展示空闲停车位
+const availableSpaceList = computed(() => {
+  return spaceList.value.filter(space => space.status === 0)
+})
+
+const selectedGridArea = computed(() => {
+  return areaList.value.find(area => area.id === activeAreaId.value)
+})
+
+const selectedGridAreaName = computed(() => {
+  return selectedGridArea.value ? selectedGridArea.value.areaName : ''
+})
+
 const loadAreas = async () => {
   loadingAreas.value = true
   try {
@@ -367,6 +476,10 @@ const loadAreas = async () => {
     })
     if (response.data && response.data.records) {
       areaList.value = response.data.records.filter(area => area.status === 1)
+      if (areaList.value.length > 0) {
+        activeAreaId.value = areaList.value[0].id
+        await loadGridSpaces(activeAreaId.value)
+      }
     }
   } catch (error) {
     console.error('加载停车区域列表失败:', error)
@@ -386,7 +499,8 @@ const loadSpacesByAreaId = async (areaId) => {
   try {
     const response = await service.get(`/space/area/${areaId}`)
     if (response.data) {
-      spaceList.value = response.data.filter(space => space.status === 0)
+      // 改造后不再过滤状态，所有状态均返回，由使用方自行筛选
+      spaceList.value = response.data
     }
     parkingForm.spaceId = null
   } catch (error) {
@@ -397,8 +511,74 @@ const loadSpacesByAreaId = async (areaId) => {
   }
 }
 
+const loadGridSpaces = async (areaId) => {
+  if (!areaId) {
+    gridSpaceList.value = []
+    return
+  }
+  loadingGridSpaces.value = true
+  try {
+    const res = await parkApi.spaceApi.getSpacesByAreaId(areaId)
+    gridSpaceList.value = res.data || []
+  } catch (error) {
+    console.error('加载网格停车位失败:', error)
+    ElMessage.error('加载网格停车位失败: ' + error.message)
+  } finally {
+    loadingGridSpaces.value = false
+  }
+}
+
 const handleAreaChange = (areaId) => {
   loadSpacesByAreaId(areaId)
+}
+
+const handleTabChange = (areaId) => {
+  activeAreaId.value = areaId
+  loadGridSpaces(areaId)
+}
+
+const getSpaceStatusClass = (status) => {
+  if (status === 0) return 'free'
+  if (status === 1) return 'occupied'
+  return 'fault'
+}
+
+const handleSpaceClick = (space) => {
+  if (space.status !== 0) {
+    ElMessage.warning('该停车位不可使用，请选择空闲车位')
+    return
+  }
+  selectedGridSpace.value = space
+  registerCarNumber.value = ''
+  registerDialogVisible.value = true
+}
+
+const handleRegisterConfirm = async () => {
+  if (!selectedGridSpace.value) return
+
+  if (!registerCarNumber.value || registerCarNumber.value.trim() === '') {
+    ElMessage.warning('请输入车牌号')
+    return
+  }
+
+  registerLoading.value = true
+  try {
+    const res = await recordApi.simulateCreateRecord({
+      spaceId: selectedGridSpace.value.id,
+      carNumber: registerCarNumber.value.trim()
+    })
+    registerDialogVisible.value = false
+    await loadGridSpaces(activeAreaId.value)
+    if (res.data) {
+      orderInfo.value = res.data
+      showSuccessDialog.value = true
+    }
+  } catch (error) {
+    console.error('网格登记停车失败:', error)
+    ElMessage.error(error.message || '停车登记失败')
+  } finally {
+    registerLoading.value = false
+  }
 }
 
 const handleStartParking = async () => {
@@ -424,6 +604,7 @@ const handleStartParking = async () => {
     if (response.data) {
       orderInfo.value = response.data
       showSuccessDialog.value = true
+      await loadGridSpaces(activeAreaId.value)
     }
   } catch (error) {
     console.error('创建停车记录失败:', error)
@@ -492,6 +673,100 @@ onMounted(() => {
   margin: 0;
 }
 
+/* 网格化区域 */
+.grid-section {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  margin-bottom: 24px;
+}
+
+.area-tabs {
+  margin-bottom: 16px;
+}
+
+.grid-legend {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: #4b5563;
+}
+
+.legend-dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 3px;
+}
+
+.legend-dot.free {
+  background: #1677ff;
+}
+
+.legend-dot.occupied {
+  background: #f56c6c;
+}
+
+.legend-dot.fault {
+  background: #c0c4cc;
+}
+
+.grid-scroll-wrapper {
+  overflow-x: auto;
+}
+
+.space-grid {
+  display: grid;
+  grid-template-columns: repeat(10, minmax(56px, 1fr));
+  gap: 8px;
+  min-width: 640px;
+}
+
+.space-cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  padding: 8px 4px;
+  border-radius: 6px;
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 500;
+  text-align: center;
+  transition: all 0.2s ease;
+  user-select: none;
+}
+
+.space-cell.free {
+  background: #1677ff;
+  cursor: pointer;
+}
+
+.space-cell.free:hover {
+  background: #4096ff;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(22, 119, 255, 0.3);
+}
+
+.space-cell.occupied {
+  background: #f56c6c;
+  cursor: not-allowed;
+}
+
+.space-cell.fault {
+  background: #c0c4cc;
+  cursor: not-allowed;
+}
+
 .main-content {
   display: grid;
   grid-template-columns: 1fr 1.5fr;
@@ -519,7 +794,7 @@ onMounted(() => {
 .section-title .icon {
   width: 20px;
   height: 20px;
-  color: #10b981;
+  color: #1677ff;
 }
 
 .form-section {
@@ -553,7 +828,7 @@ onMounted(() => {
 .user-info .user-icon {
   width: 24px;
   height: 24px;
-  color: #10b981;
+  color: #1677ff;
 }
 
 .user-info span {
@@ -625,8 +900,8 @@ onMounted(() => {
 }
 
 .animation-item.selected .icon-wrapper {
-  background: linear-gradient(135deg, rgba(34, 197, 94, 0.1) 0%, rgba(34, 197, 94, 0.05) 100%);
-  box-shadow: 0 8px 24px rgba(34, 197, 94, 0.15);
+  background: linear-gradient(135deg, rgba(22, 119, 255, 0.1) 0%, rgba(22, 119, 255, 0.05) 100%);
+  box-shadow: 0 8px 24px rgba(22, 119, 255, 0.15);
   transform: scale(1.05);
 }
 
@@ -704,11 +979,11 @@ onMounted(() => {
 }
 
 .status-active {
-  color: #10b981;
+  color: #1677ff;
 }
 
 .tips-card {
-  background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+  background: linear-gradient(135deg, #f0f5ff 0%, #dce7ff 100%);
   border-radius: 12px;
   padding: 20px;
   display: flex;
@@ -718,7 +993,7 @@ onMounted(() => {
 .tip-icon {
   width: 24px;
   height: 24px;
-  color: #10b981;
+  color: #1677ff;
   flex-shrink: 0;
 }
 
@@ -726,7 +1001,7 @@ onMounted(() => {
   margin: 0 0 8px 0;
   font-size: 14px;
   font-weight: 500;
-  color: #065f46;
+  color: #0c4a6e;
 }
 
 .tip-content ul {
@@ -736,8 +1011,29 @@ onMounted(() => {
 
 .tip-content li {
   font-size: 13px;
-  color: #059669;
+  color: #0958d9;
   margin-bottom: 4px;
+}
+
+.register-info {
+  margin-bottom: 20px;
+  padding: 16px;
+  background: #f9fafb;
+  border-radius: 8px;
+}
+
+.register-info p {
+  margin: 0 0 8px 0;
+  font-size: 14px;
+  color: #374151;
+}
+
+.register-info p:last-child {
+  margin-bottom: 0;
+}
+
+.register-label {
+  color: #6b7280;
 }
 
 .success-content {
@@ -749,7 +1045,7 @@ onMounted(() => {
   width: 80px;
   height: 80px;
   margin: 0 auto 20px;
-  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  background: linear-gradient(135deg, #1677ff 0%, #0958d9 100%);
   border-radius: 50%;
   display: flex;
   align-items: center;

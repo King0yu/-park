@@ -1,0 +1,90 @@
+/* ========== 停车场管理系统 - 全局商务蓝主题样式 ========== */
+/* 设计令牌 - CSS 自定义属性 */
+
+:root {
+  --app-primary: #1677ff;
+  --app-primary-dark: #0958d9;
+  --app-primary-light: #4096ff;
+  --app-primary-bg: #f0f5ff;
+  --app-radius-card: 12px;
+  --app-shadow-card: 0 4px 16px rgba(0, 0, 0, 0.08);
+  --app-table-header-bg: #f9fafc;
+  --app-table-stripe-bg: #fafbfc;
+}
+
+/* ========== 全局卡片样式 ========== */
+.app-card {
+  background: #fff;
+  border-radius: var(--app-radius-card);
+  box-shadow: var(--app-shadow-card);
+  border: none;
+}
+
+/* ========== 全局表格样式 ========== */
+.app-table .el-table__header th {
+  background: var(--app-table-header-bg);
+  font-weight: 600;
+  color: #1e293b;
+}
+
+/* ========== 全局弹窗样式 ========== */
+.app-dialog .el-dialog {
+  border-radius: var(--app-radius-card);
+  overflow: hidden;
+}
+
+.app-dialog .el-dialog__header {
+  background: linear-gradient(135deg, var(--app-table-header-bg), #f0f5ff);
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.app-dialog .el-dialog__footer {
+  background: var(--app-table-header-bg);
+  border-top: 1px solid #e2e8f0;
+}
+
+/* ========== 状态标签预设 ========== */
+.status-available {
+  background: #10b981;
+  color: #fff;
+  padding: 2px 10px;
+  border-radius: 9999px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.status-occupied {
+  background: #1677ff;
+  color: #fff;
+  padding: 2px 10px;
+  border-radius: 9999px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.status-maintenance {
+  background: #f59e0b;
+  color: #fff;
+  padding: 2px 10px;
+  border-radius: 9999px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.status-fault {
+  background: #ef4444;
+  color: #fff;
+  padding: 2px 10px;
+  border-radius: 9999px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+/* ========== 搜索栏通用样式 ========== */
+.search-bar-blue {
+  background: linear-gradient(135deg, var(--app-primary-bg) 0%, var(--app-table-header-bg) 100%);
+  border-radius: var(--app-radius-card);
+  padding: 16px;
+  margin-bottom: 16px;
+  border: 1px solid rgba(22, 119, 255, 0.06);
+}

@@ -79,6 +79,26 @@ const routes = [
           requiresAuth: true,
           roles: [0, 1, 2]
         }
+      },
+      {
+        path: 'profile',
+        name: 'Profile',
+        component: () => import('@/views/profile/Profile.vue'),
+        meta: {
+          title: '个人中心',
+          requiresAuth: true,
+          roles: [0, 1, 2]
+        }
+      },
+      {
+        path: 'settings',
+        name: 'Settings',
+        component: () => import('@/views/settings/Settings.vue'),
+        meta: {
+          title: '系统设置',
+          requiresAuth: true,
+          roles: [0, 1, 2]
+        }
       }
     ]
   }

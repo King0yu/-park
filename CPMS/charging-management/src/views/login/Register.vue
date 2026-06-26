@@ -9,7 +9,7 @@
       <!-- 停车场主题装饰 -->
       <div class="parking-decoration parking-car">
         <svg viewBox="0 0 100 60" fill="none">
-          <rect x="5" y="20" width="90" height="35" rx="5" fill="#22c55e"/>
+          <rect x="5" y="20" width="90" height="35" rx="5" fill="#1677ff"/>
           <rect x="15" y="25" width="25" height="20" rx="3" fill="#ffffff"/>
           <rect x="60" y="25" width="25" height="20" rx="3" fill="#ffffff"/>
           <circle cx="15" cy="52" r="8" fill="#1e293b"/>
@@ -19,10 +19,10 @@
       
       <div class="parking-decoration parking-space">
         <svg viewBox="0 0 80 80" fill="none">
-          <rect x="5" y="5" width="70" height="70" rx="8" stroke="#22c55e" stroke-width="3" fill="none"/>
-          <rect x="15" y="20" width="50" height="40" rx="4" stroke="#22c55e" stroke-width="2" stroke-dasharray="4 4"/>
-          <path d="M30 30 L30 50 M50 30 L50 50" stroke="#22c55e" stroke-width="2"/>
-          <circle cx="40" cy="60" r="8" fill="#22c55e"/>
+          <rect x="5" y="5" width="70" height="70" rx="8" stroke="#1677ff" stroke-width="3" fill="none"/>
+          <rect x="15" y="20" width="50" height="40" rx="4" stroke="#1677ff" stroke-width="2" stroke-dasharray="4 4"/>
+          <path d="M30 30 L30 50 M50 30 L50 50" stroke="#1677ff" stroke-width="2"/>
+          <circle cx="40" cy="60" r="8" fill="#1677ff"/>
         </svg>
       </div>
     </div>
