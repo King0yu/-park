@@ -323,7 +323,7 @@ const searchForm = reactive({
 const detailOrder = ref(null)
 const detailDialogVisible = ref(false)
 
-// 结束充电相关
+// 结束停车相关
 const finishDialogVisible = ref(false)
 const currentFinishOrderId = ref(null)
 
@@ -994,7 +994,7 @@ onMounted(() => {
   }
 }
 
-/* 结束充电弹窗样式 */
+/* 结束停车弹窗样式 */
 .finish-summary {
   background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
   border-radius: 16px;

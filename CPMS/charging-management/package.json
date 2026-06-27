@@ -1,7 +1,7 @@
 {
-  "name": "charging-management",
+  "name": "parking-management-frontend",
   "version": "1.0.0",
-  "description": "充电桩管理系统前端",
+  "description": "小区停车场管理系统前端",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
