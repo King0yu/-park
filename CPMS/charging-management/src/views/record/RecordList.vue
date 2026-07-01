@@ -517,7 +517,7 @@ const handleSelectionChange = (selection) => {
 // 查看详情
 const handleViewDetail = async (row) => {
   try {
-    const response = await recordApi.getOrderById(row.id)
+    const response = await recordApi.getRecordById(row.id)
     detailOrder.value = response.data
     detailDialogVisible.value = true
   } catch (error) {
