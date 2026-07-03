@@ -127,7 +127,20 @@ public class ParkRecordServiceImpl implements ParkRecordService {
         record.setUpdateTime(LocalDateTime.now());
 
         // 执行更新
-        return parkRecordMapper.updateById(record) > 0;
+        int result = parkRecordMapper.updateById(record);
+
+        // 释放停车位：将状态恢复为空闲，清除车牌号
+        if (result > 0 && record.getSpaceId() != null) {
+            ParkSpace parkSpace = parkSpaceMapper.selectById(record.getSpaceId());
+            if (parkSpace != null && parkSpace.getStatus() != null && parkSpace.getStatus() == 1) {
+                parkSpace.setStatus(0);
+                parkSpace.setCarNumber(null);
+                parkSpace.setUpdateTime(LocalDateTime.now());
+                parkSpaceMapper.updateById(parkSpace);
+            }
+        }
+
+        return result > 0;
     }
 
     @Override
@@ -155,7 +168,20 @@ public class ParkRecordServiceImpl implements ParkRecordService {
         record.setUpdateTime(LocalDateTime.now());
 
         // 执行更新
-        return parkRecordMapper.updateById(record) > 0;
+        int result = parkRecordMapper.updateById(record);
+
+        // 释放停车位：取消记录时同步释放车位
+        if (result > 0 && record.getSpaceId() != null) {
+            ParkSpace parkSpace = parkSpaceMapper.selectById(record.getSpaceId());
+            if (parkSpace != null && parkSpace.getStatus() != null && parkSpace.getStatus() == 1) {
+                parkSpace.setStatus(0);
+                parkSpace.setCarNumber(null);
+                parkSpace.setUpdateTime(LocalDateTime.now());
+                parkSpaceMapper.updateById(parkSpace);
+            }
+        }
+
+        return result > 0;
     }
 
     @Override
@@ -430,6 +456,19 @@ public class ParkRecordServiceImpl implements ParkRecordService {
         record.setUpdateTime(LocalDateTime.now());
 
         // 执行更新
-        return parkRecordMapper.updateById(record) > 0;
+        int result = parkRecordMapper.updateById(record);
+
+        // 释放停车位：结算完成后将车位恢复为空闲
+        if (result > 0 && record.getSpaceId() != null) {
+            ParkSpace parkSpace = parkSpaceMapper.selectById(record.getSpaceId());
+            if (parkSpace != null && parkSpace.getStatus() != null && parkSpace.getStatus() == 1) {
+                parkSpace.setStatus(0);
+                parkSpace.setCarNumber(null);
+                parkSpace.setUpdateTime(LocalDateTime.now());
+                parkSpaceMapper.updateById(parkSpace);
+            }
+        }
+
+        return result > 0;
     }
 }
