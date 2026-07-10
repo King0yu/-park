@@ -112,6 +112,21 @@ public interface ParkRecordService {
     List<ParkRecord> getUserActiveRecords(Long userId);
 
     /**
+     * 查询用户的进行中记录（关联停车位名称）
+     */
+    List<ParkRecord> getUserActiveRecordsWithSpace(Long userId);
+
+    /**
+     * 分页查询用户的记录（关联停车位名称）
+     */
+    java.util.Map<String, Object> getUserRecordsPageWithSpace(Long userId, int pageNum, int pageSize);
+
+    /**
+     * 统计用户未删除记录数
+     */
+    Long countUserRecordsNotDeleted(Long userId);
+
+    /**
      * 统计用户记录总数
      *
      * @param userId 用户ID
@@ -163,4 +178,14 @@ public interface ParkRecordService {
      * @return 创建的停车记录实体
      */
     ParkRecord simulateCreateRecord(Long userId, Long spaceId, String carNumber);
+
+    /**
+     * 统计今日订单数量（用于数据大屏）
+     */
+    Long countTodayRecords();
+
+    /**
+     * 统计今日营收（用于数据大屏）
+     */
+    BigDecimal sumTodayAmount();
 }

@@ -58,4 +58,12 @@ public interface ParkSpaceMapper extends BaseMapper<ParkSpace> {
      */
     @Select("SELECT * FROM park_space WHERE status = 0 ORDER BY create_time DESC")
     List<ParkSpace> selectAvailableSpaces();
+
+    /**
+     * 统计各状态停车位数量（用于数据大屏）
+     *
+     * @return key=status(0空闲/1占用/2故障/3维护), value=数量
+     */
+    @Select("SELECT status, COUNT(*) AS count FROM park_space GROUP BY status")
+    List<java.util.Map<String, Object>> countByStatus();
 }

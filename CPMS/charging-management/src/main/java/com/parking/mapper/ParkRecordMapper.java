@@ -73,6 +73,39 @@ public interface ParkRecordMapper extends BaseMapper<ParkRecord> {
     List<ParkRecord> selectUserActiveRecords(@Param("userId") Long userId);
 
     /**
+     * 查询用户的进行中记录（待停车、停车中）- 关联停车位信息
+     *
+     * @param userId 用户ID
+     * @return 用户的进行中记录列表（包含 spaceCode / spaceName）
+     */
+    @Select("SELECT pr.*, p.space_code AS spaceCode, p.space_name AS spaceName " +
+            "FROM park_record pr " +
+            "LEFT JOIN park_space p ON pr.space_id = p.id " +
+            "WHERE pr.user_id = #{userId} AND pr.status IN (0, 1) " +
+            "ORDER BY pr.create_time DESC")
+    List<ParkRecord> selectUserActiveRecordsWithSpace(@Param("userId") Long userId);
+
+    /**
+     * 分页查询用户的记录 - 关联停车位信息（用于用户端 Dashboard）
+     */
+    @Select("SELECT pr.*, p.space_code AS spaceCode, p.space_name AS spaceName " +
+            "FROM park_record pr " +
+            "LEFT JOIN park_space p ON pr.space_id = p.id " +
+            "WHERE pr.user_id = #{userId} AND pr.is_deleted = 0 " +
+            "ORDER BY pr.create_time DESC " +
+            "LIMIT #{offset}, #{size}")
+    List<ParkRecord> selectUserRecordsPageWithSpace(
+            @Param("userId") Long userId,
+            @Param("offset") int offset,
+            @Param("size") int size);
+
+    /**
+     * 统计用户记录数（未删除）
+     */
+    @Select("SELECT COUNT(*) FROM park_record WHERE user_id = #{userId} AND is_deleted = 0")
+    Long countUserRecordsNotDeleted(@Param("userId") Long userId);
+
+    /**
      * 查询停车中的记录
      *
      * @return 停车中的记录列表
@@ -114,6 +147,18 @@ public interface ParkRecordMapper extends BaseMapper<ParkRecord> {
      */
     @Select("SELECT COALESCE(SUM(total_cost), 0) FROM park_record WHERE user_id = #{userId} AND status = 2")
     BigDecimal sumAmountByUserId(@Param("userId") Long userId);
+
+    /**
+     * 统计今日结算订单数（按结束时间，用于数据大屏）
+     */
+    @Select("SELECT COUNT(*) FROM park_record WHERE DATE(end_time) = CURDATE() AND status = 2")
+    Long countTodayRecords();
+
+    /**
+     * 统计今日营收（按结束时间，即今日结算的订单总额）
+     */
+    @Select("SELECT COALESCE(SUM(total_cost), 0) FROM park_record WHERE DATE(end_time) = CURDATE() AND status = 2")
+    BigDecimal sumTodayAmount();
 
     /**
      * 查询停车记录详情（关联用户、区域、停车位信息）

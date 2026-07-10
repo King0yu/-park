@@ -139,10 +139,15 @@ const spaceApi = {
    */
   deleteSpace(id) {
     return service.delete(`/space/${id}`)
+  },
+
+  /**
+   * 停车位状态统计（管理端数据大屏）
+   */
+  getSpaceStatistics() {
+    return service.get('/space/statistics')
   }
 }
 
-export default {
-  areaApi,
-  spaceApi
+export default {  areaApi,  spaceApi
 }

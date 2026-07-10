@@ -87,4 +87,11 @@ public interface ParkSpaceService {
      * @return 是否存在
      */
     boolean existsBySpaceCodeExcludeId(String spaceCode, Long excludeId);
+
+    /**
+     * 统计各状态停车位数量（用于数据大屏）
+     *
+     * @return key=status, value=count
+     */
+    java.util.Map<Integer, Integer> countByStatus();
 }

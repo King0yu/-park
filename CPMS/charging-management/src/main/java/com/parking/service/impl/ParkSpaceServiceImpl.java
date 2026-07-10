@@ -215,4 +215,20 @@ public class ParkSpaceServiceImpl implements ParkSpaceService {
                     .ne(ParkSpace::getId, excludeId);
         return parkSpaceMapper.exists(queryWrapper);
     }
+
+    @Override
+    public java.util.Map<Integer, Integer> countByStatus() {
+        List<java.util.Map<String, Object>> raw = parkSpaceMapper.countByStatus();
+        java.util.Map<Integer, Integer> result = new java.util.HashMap<>();
+        if (raw != null) {
+            for (java.util.Map<String, Object> row : raw) {
+                Object statusObj = row.get("status");
+                Object countObj = row.get("count");
+                if (statusObj != null && countObj != null) {
+                    result.put(((Number) statusObj).intValue(), ((Number) countObj).intValue());
+                }
+            }
+        }
+        return result;
+    }
 }

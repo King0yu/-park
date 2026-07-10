@@ -1,9 +1,14 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { ElMessage } from 'element-plus'
+import userRoutes from './user.routes.js'
+import adminRoutes from './admin.routes.js'
 
 /**
- * 路由配置
+ * 角色常量
  */
+const ROLE_SUPER_ADMIN = 0
+const ROLE_ADMIN = 1
+const ROLE_USER = 2
 
 const routes = [
   {
@@ -22,91 +27,30 @@ const routes = [
     component: () => import('@/views/login/Register.vue'),
     meta: { title: '注册', requiresAuth: false }
   },
+
+  // ==================== 用户端（车主） ====================
   {
-    path: '/device/manage',
-    name: 'DeviceManage',
-    component: () => import('@/views/parking/ParkingManage.vue'),
-    meta: {
-      title: '设备管理',
-      requiresAuth: true,
-      roles: [0, 1, 2]
-    }
+    path: '/user',
+    component: () => import('@/layout/UserLayout.vue'),
+    meta: { title: '我的停车', requiresAuth: true, roles: [ROLE_USER] },
+    children: userRoutes
   },
 
+  // ==================== 管理端（管理员+超级管理员） ====================
   {
-    path: '/system',
-    name: 'System',
-    component: () => import('@/layout/Layout.vue'),
-    meta: { title: '系统管理', requiresAuth: true },
-    children: [
-      {
-        path: 'user',
-        name: 'User',
-        component: () => import('@/views/user/UserList.vue'),
-        meta: {
-          title: '用户管理',
-          requiresAuth: true,
-          roles: [0, 1, 2]
-        }
-      },
-      {
-        path: 'device',
-        name: 'Device',
-        component: () => import('@/views/parking/ParkingManage.vue'),
-        meta: {
-          title: '设备管理',
-          requiresAuth: true,
-          roles: [0, 1, 2]
-        }
-      },
-      {
-        path: 'order',
-        name: 'Order',
-        component: () => import('@/views/record/RecordList.vue'),
-        meta: {
-          title: '订单管理',
-          requiresAuth: true,
-          roles: [0, 1, 2],
-          selfOrderOnly: true
-        }
-      },
-      {
-        path: 'parking-simulate',
-        name: 'ParkingSimulate',
-        component: () => import('@/views/simulate/ParkingSimulate.vue'),
-        meta: {
-          title: '模拟停车登记',
-          requiresAuth: true,
-          roles: [0, 1, 2]
-        }
-      },
-      {
-        path: 'profile',
-        name: 'Profile',
-        component: () => import('@/views/profile/Profile.vue'),
-        meta: {
-          title: '个人中心',
-          requiresAuth: true,
-          roles: [0, 1, 2]
-        }
-      },
-      {
-        path: 'settings',
-        name: 'Settings',
-        component: () => import('@/views/settings/Settings.vue'),
-        meta: {
-          title: '系统设置',
-          requiresAuth: true,
-          roles: [0, 1, 2]
-        }
-      }
-    ]
+    path: '/admin',
+    component: () => import('@/layout/AdminLayout.vue'),
+    meta: { title: '管理后台', requiresAuth: true, roles: [ROLE_SUPER_ADMIN, ROLE_ADMIN] },
+    children: adminRoutes
+  },
+
+  // 404
+  {
+    path: '/:pathMatch(.*)*',
+    redirect: '/login'
   }
 ]
 
-/**
- * 创建路由实例
- */
 const router = createRouter({
   history: createWebHistory(),
   routes
@@ -116,31 +60,46 @@ const router = createRouter({
  * 路由守卫
  */
 router.beforeEach((to, from, next) => {
+  // 设置页面标题
+  const titlePrefix = to.matched[0]?.meta?.title || '小区停车场管理系统'
   document.title = to.meta.title
-    ? `${to.meta.title} - 小区停车场管理系统`
-    : '小区停车场管理系统'
+    ? `${to.meta.title} - ${titlePrefix}`
+    : titlePrefix
 
-  if (to.meta.requiresAuth) {
-    const token = localStorage.getItem('token')
-    if (!token) {
-      next({
-        path: '/login',
-        query: { redirect: to.fullPath }
-      })
-      return
-    }
+  // 无需认证，直接放行
+  if (!to.meta.requiresAuth) {
+    next()
+    return
+  }
 
-    if (to.meta.roles) {
-      const userInfo = localStorage.getItem('userInfo')
-      if (userInfo) {
+  // 检查 token
+  const token = localStorage.getItem('token')
+  if (!token) {
+    next({ path: '/login', query: { redirect: to.fullPath } })
+    return
+  }
+
+  // 角色权限检查
+  if (to.meta.roles && to.meta.roles.length > 0) {
+    const userInfo = localStorage.getItem('userInfo')
+    if (userInfo) {
+      try {
         const user = JSON.parse(userInfo)
-        // 将 role 转换为数字类型，确保类型匹配
         const userRole = Number(user.role)
+
         if (!to.meta.roles.includes(userRole)) {
           ElMessage.error('您没有访问该页面的权限')
-          next('/')
+
+          // 根据角色跳转到各自的首页
+          if (userRole === ROLE_USER) {
+            next('/user/dashboard')
+          } else {
+            next('/admin/dashboard')
+          }
           return
         }
+      } catch (e) {
+        console.error('解析用户信息失败:', e)
       }
     }
   }

@@ -88,6 +88,13 @@ const recordApi = {
   },
 
   /**
+   * 分页获取当前用户的停车记录（关联停车位名称）
+   */
+  getMyRecordsPage(params) {
+    return service.get('/record/my/page', { params })
+  },
+
+  /**
    * 获取当前用户的进行中停车记录
    */
   getMyActiveRecords() {
@@ -162,6 +169,13 @@ const recordApi = {
    */
   autoFinishRecord(id) {
     return service.put(`/record/autoFinish/${id}`)
+  },
+
+  /**
+   * 今日统计（管理端数据大屏）
+   */
+  getTodayStatistics() {
+    return service.get('/record/statistics/today')
   }
 }
 

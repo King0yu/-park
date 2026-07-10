@@ -245,12 +245,13 @@
 
 <script setup>
 import { ref, reactive } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { User, Lock, Phone, InfoFilled, CircleCheck } from '@element-plus/icons-vue'
 import axios from 'axios'
 
 const router = useRouter()
+const route = useRoute()
 
 const loginFormRef = ref(null)
 const loading = ref(false)
@@ -455,7 +456,20 @@ const handleLogin = async () => {
       }
       
       ElMessage.success('登录成功')
-      router.push('/system/user')
+
+      // 根据角色跳转到对应系统
+      const userInfo = response.data.data.userInfo || {}
+      const role = Number(userInfo.role)
+      const redirect = route.query.redirect
+
+      if (redirect) {
+        // 如果有 redirect 参数，先尝试跳回原页面（路由守卫会校验角色权限）
+        router.push(redirect)
+      } else if (role === 2) {
+        router.push('/user/dashboard')       // 普通用户 → 用户端
+      } else {
+        router.push('/admin/dashboard')      // 管理员/超管 → 管理端
+      }
     } else {
       ElMessage.error(response.data.msg || '登录失败')
     }

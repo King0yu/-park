@@ -304,6 +304,27 @@ public class ParkRecordController {
     }
 
     /**
+     * 获取当前用户的停车记录列表（关联停车位名称，分页）
+     * GET /api/record/my/page
+     */
+    @GetMapping("/my/page")
+    public R<?> getMyRecordsPage(
+            @RequestParam(defaultValue = "1") int pageNum,
+            @RequestParam(defaultValue = "10") int pageSize,
+            HttpServletRequest request) {
+        R<?> loginCheck = checkLogin(request);
+        if (loginCheck != null) {
+            return loginCheck;
+        }
+        Long currentUserId = getCurrentUserId(request);
+        try {
+            return R.success(parkRecordService.getUserRecordsPageWithSpace(currentUserId, pageNum, pageSize));
+        } catch (Exception e) {
+            return R.error(e.getMessage());
+        }
+    }
+
+    /**
      * 获取当前登录用户的进行中记录
      *
      * GET /api/record/my/active
@@ -319,7 +340,7 @@ public class ParkRecordController {
         Long currentUserId = getCurrentUserId(request);
 
         try {
-            return R.success(parkRecordService.getUserActiveRecords(currentUserId));
+            return R.success(parkRecordService.getUserActiveRecordsWithSpace(currentUserId));
         } catch (Exception e) {
             return R.error(e.getMessage());
         }
@@ -346,6 +367,32 @@ public class ParkRecordController {
             statistics.put("totalParkingDuration", parkRecordService.sumUserParkingDuration(currentUserId));
             statistics.put("totalAmount", parkRecordService.sumUserAmount(currentUserId));
             return R.success(statistics);
+        } catch (Exception e) {
+            return R.error(e.getMessage());
+        }
+    }
+
+    /**
+     * 今日运营统计（用于数据大屏）
+     * GET /api/record/statistics/today
+     */
+    @GetMapping("/statistics/today")
+    public R<?> getTodayStatistics(HttpServletRequest request) {
+        R<?> loginCheck = checkLogin(request);
+        if (loginCheck != null) {
+            return loginCheck;
+        }
+
+        Integer currentRole = getCurrentUserRole(request);
+        if (currentRole != null && currentRole == 2) {
+            return R.error(403, "您没有访问该页面的权限");
+        }
+
+        try {
+            java.util.Map<String, Object> data = new java.util.HashMap<>();
+            data.put("todayOrders", parkRecordService.countTodayRecords());
+            data.put("todayAmount", parkRecordService.sumTodayAmount());
+            return R.success(data);
         } catch (Exception e) {
             return R.error(e.getMessage());
         }

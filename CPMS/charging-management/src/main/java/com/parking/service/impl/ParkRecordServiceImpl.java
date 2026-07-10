@@ -268,11 +268,28 @@ public class ParkRecordServiceImpl implements ParkRecordService {
 
     @Override
     public List<ParkRecord> getUserActiveRecords(Long userId) {
-        LambdaQueryWrapper<ParkRecord> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(ParkRecord::getUserId, userId);
-        queryWrapper.in(ParkRecord::getStatus, RECORD_STATUS_PENDING, RECORD_STATUS_PARKING);
-        queryWrapper.orderByDesc(ParkRecord::getCreateTime);
-        return parkRecordMapper.selectList(queryWrapper);
+        return parkRecordMapper.selectUserActiveRecords(userId);
+    }
+
+    @Override
+    public List<ParkRecord> getUserActiveRecordsWithSpace(Long userId) {
+        return parkRecordMapper.selectUserActiveRecordsWithSpace(userId);
+    }
+
+    @Override
+    public java.util.Map<String, Object> getUserRecordsPageWithSpace(Long userId, int pageNum, int pageSize) {
+        int offset = (pageNum - 1) * pageSize;
+        List<ParkRecord> records = parkRecordMapper.selectUserRecordsPageWithSpace(userId, offset, pageSize);
+        Long total = parkRecordMapper.countUserRecordsNotDeleted(userId);
+        java.util.Map<String, Object> result = new java.util.HashMap<>();
+        result.put("records", records);
+        result.put("total", total);
+        return result;
+    }
+
+    @Override
+    public Long countUserRecordsNotDeleted(Long userId) {
+        return parkRecordMapper.countUserRecordsNotDeleted(userId);
     }
 
     @Override
@@ -317,6 +334,17 @@ public class ParkRecordServiceImpl implements ParkRecordService {
         // 生成新序号（4位，不足补0）
         int newSeq = maxSeq + 1;
         return prefix + String.format("%04d", newSeq);
+    }
+
+    @Override
+    public Long countTodayRecords() {
+        return parkRecordMapper.countTodayRecords();
+    }
+
+    @Override
+    public BigDecimal sumTodayAmount() {
+        BigDecimal result = parkRecordMapper.sumTodayAmount();
+        return result == null ? BigDecimal.ZERO : result;
     }
 
     @Override

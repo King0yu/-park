@@ -181,4 +181,61 @@ public class ParkSpaceController {
 
         return R.success(page);
     }
+
+    /**
+     * 停车位状态统计（用于数据大屏）
+     * GET /api/space/statistics
+     */
+    @GetMapping("/statistics")
+    public R<?> getSpaceStatistics(HttpServletRequest request) {
+        // 优先校验登录（管理端任何人都得先登录）
+        R<?> loginCheck = checkLogin(request);
+        if (loginCheck != null) {
+            return loginCheck;
+        }
+
+        // 限管理端
+        R<?> permissionCheck = checkPermission(request);
+        if (permissionCheck != null) {
+            return permissionCheck;
+        }
+
+        java.util.Map<Integer, Integer> statusMap = parkSpaceService.countByStatus();
+        int total = statusMap.values().stream().mapToInt(Integer::intValue).sum();
+        int free = statusMap.getOrDefault(0, 0);
+        int occupied = statusMap.getOrDefault(1, 0);
+        int fault = statusMap.getOrDefault(2, 0) + statusMap.getOrDefault(3, 0);
+
+        java.util.Map<String, Object> data = new java.util.HashMap<>();
+        data.put("total", total);
+        data.put("free", free);
+        data.put("occupied", occupied);
+        data.put("fault", fault);
+        return R.success(data);
+    }
+
+    /**
+     * 检查登录状态
+     */
+    private R<?> checkLogin(HttpServletRequest request) {
+        Long userId = getCurrentUserId(request);
+        if (userId == null) {
+            return R.error(401, "未登录或登录已过期");
+        }
+        return null;
+    }
+
+    /**
+     * 从请求头获取当前登录用户ID
+     */
+    private Long getCurrentUserId(HttpServletRequest request) {
+        String idStr = request.getHeader("X-User-Id");
+        if (idStr != null && !idStr.isEmpty()) {
+            try {
+                return Long.parseLong(idStr);
+            } catch (NumberFormatException ignored) {
+            }
+        }
+        return null;
+    }
 }

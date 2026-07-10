@@ -616,7 +616,14 @@ const handleStartParking = async () => {
 
 const goToOrderList = () => {
   showSuccessDialog.value = false
-  router.push('/system/order')
+  // 根据当前用户角色跳转到对应的记录页
+  const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}')
+  const role = Number(userInfo.role)
+  if (role === 2) {
+    router.push('/user/records')    // 车主 → 用户端
+  } else {
+    router.push('/admin/orders')    // 管理员/超管 → 管理端
+  }
 }
 
 const formatDateTime = (dateTime) => {
